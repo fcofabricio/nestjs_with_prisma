@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,6 +8,7 @@ async function bootstrap() {
   app.setGlobalPrefix('v1', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
   });
+
   app.enableCors((req, callback) => {
     const whitelist = ['http://localhost:3000', 'http://localhost:4200'];
     const corsOptions = {
@@ -19,6 +20,9 @@ async function bootstrap() {
     callback(null, corsOptions);
   });
 
+  app.useGlobalPipes(new ValidationPipe());
+
   await app.listen(3000);
 }
+
 bootstrap();

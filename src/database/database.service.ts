@@ -1,22 +1,19 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import * as dotenv from 'dotenv';
-import * as ws from 'ws';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit {
+export class DatabaseService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
-    dotenv.config({ path: __dirname + '/.env' });
-    neonConfig.webSocketConstructor = ws;
-    const connectionString = `${process.env.DATABASE_URL}`;
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaNeon(pool);
-    super({ adapter });
+    super({ log: ['query', 'info', 'warn', 'error'] });
   }
-
   async onModuleInit() {
     await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
   }
 }
