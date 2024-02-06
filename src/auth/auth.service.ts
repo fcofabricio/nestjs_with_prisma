@@ -28,7 +28,8 @@ export class AuthService {
         password: bcrypt.hashSync(password, bcrypt.genSaltSync()),
       })
       .then((user) => {
-        return this.sendEmail(user);
+        this.sendEmail(user);
+        return user;
       })
       .catch((error) => {
         if (error instanceof UserServiceError) {
@@ -51,9 +52,7 @@ export class AuthService {
     };
 
     // TODO: if mail fails, what should we do?
-    this.mailerService.sendMail(mail);
-
-    return user;
+    return this.mailerService.sendMail(mail);
   }
 
   confirmEmail(hash: string) {
@@ -73,7 +72,7 @@ export class AuthService {
       }
 
       if (user.emailVerified) {
-        throw new AuthError('Already verified email`');
+        throw new AuthError('Already verified email');
       }
 
       return this.sendEmail(user);
@@ -87,7 +86,7 @@ export class AuthService {
       }
 
       if (!user.emailVerified) {
-        throw new AuthError('Not verified email`');
+        throw new AuthError('Not verified email');
       }
 
       const tokens = await this.getTokens(user.id, user.email);
